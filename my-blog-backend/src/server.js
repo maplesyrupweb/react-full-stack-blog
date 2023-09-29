@@ -3,34 +3,40 @@ import express  from 'express';
 //localhost:3003/aricles/learn-node
 // PUT /articles/learn-react/upvote
 
+// fake database
+let articlesInfo = [{
+    name: 'learn-react',
+    upvotes: 0
+},
+{
+    name: 'learn-node',
+    upvotes: 0
+},
+{
+    name: 'mongo-db',
+    upvotes: 0
+}
+]
+
 const app = express();
 app.use(express.json());
 
-app.get('/hello', (request,response) => {
-    console.log(request.body);
-    response.send(`GET - Hello, ${request.body.name}`);
-    
+
+app.put('/api/articles/:name/upvote', (request, response) => {
+    const { name } = request.params
+    // const name = request.params.name
+    const article = articlesInfo.find(
+        // a => a.name === articlesInfo[name]
+        a => a.name === name);
+        if (article) {
+            article.upvotes++;   
+            response.send(`The ${name} has ${article.upvotes} upvotes`);
+        }
+        else
+        {
+            response.send(`That article doesn\'t' exist`);
+        }
 });
-
-app.post('/hello', (request,response) => {
-    console.log(request.body);
-    response.send(`POST - Hello, ${request.body.name}`);
-});
-
-app.get('/hello/:name', (request, response)  => {
-    // const name = request.params.name; 
-    const { name } = request.params;
-    response.send(`Hello there ${name}!!`);
-});
-
-app.get('/hello/:name/goodbye/:otherName', (request, response)  => {
-    console.log(request.params);
-    const { name } = request.params;
-    const { otherName } = request.params;
-    response.send(`Hello there ${name} Goodbye ${otherName}`);
-});
-
-
 
 app.listen(8001, () => {
     console.log("Server is listening on port 8001");
