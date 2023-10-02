@@ -1,90 +1,62 @@
-import express  from 'express';
-
-//localhost:3003/aricles/learn-node
-// PUT /articles/learn-react/upvote
-
-// fake database
-let articlesInfo = [{
-    name: 'learn-react',
-    upvotes: 0,
-    comments: [],
-},
-{
-    name: 'learn-node',
-    upvotes: 0,
-    comments: [],
-
-},
-{
-    name: 'mongo-db',
-    upvotes: 0,
-    comments: [],
-}
-]
+import express from 'express';
+import { MongoClient } from 'mongodb';
 
 const app = express();
 app.use(express.json());
 
-/********************************************
- * 
- * Endpoint for upvote
- * 
- ********************************************/
+app.get('/api/articles/:name', async (req, res) => {
+    const { name } = req.params;
 
+    const client = new MongoClient('mongodb://127.0.0.1:27017');
+    await client.connect();
 
-app.put('/api/articles/:name/upvote', (request, response) => {
-    const { name } = request.params
-    
-    const article = articlesInfo.find(
-        
-        articleSearch => articleSearch.name === name);
+    const db = client.db('react-blog-db');
 
-        if (article) {
-            article.upvotes++;   
-            response.send(`The ${name} has ${article.upvotes} upvotes`);
-        }
-        else
-        {
-            response.send(`Sorry dude. That article doesn\'t' exist.`);
+    const article = await db.collection('articles').findOne({ name });
 
-            
-        }
+    if (article) {
+        res.json(article);
+        console.log("article found")
+    } else {
+        res.sendStatus(404);
+        console.log("article NOT found")
+    }
 });
 
-/********************************************
- * 
- * Endpoint for adding a comment
- * 
- ********************************************/
+app.put('/api/articles/:name/upvote', async (req, res) => {
+    const { name } = req.params;
+   
+    const client = new MongoClient('mongodb://127.0.0.1:27017');
+    await client.connect();
 
-app.post('/api/articles/:name/comments', (request, response) => {
-    const { name } = request.params;
-    const { postedBy, text } = request.body
-    
-    const article = articlesInfo.find(
-    
-        articleSearch => articleSearch.name === name);
+    const db = client.db('react-blog-db');
+    await db.collection('articles').updateOne({ name }, {
+        $inc: { upvotes: 1 },
+    });
+    const article = await db.collection('articles').findOne({ name });
 
-        if (article) {
-            
-            article.comments.push({postedBy,text})
-            response.send(article.comments)
-            console.log(postedBy);
-            console.log(text);
-
-            // response.send(`Posted by: ${request.body.postedBy} and text: ${request.body.text}`)
-
-            
-        }
-        else
-        {
-            response.send(`Sorry. Comment not added`);
-
-            
-        }
+    if (article) {
+        article.upvotes += 1;
+        res.send(`The ${name} article now has ${article.upvotes} upvotes!!!`);
+    } else {
+        res.send('That article doesn\'t exist');
+    }
 });
 
+app.post('/api/articles/:name/comments', (req, res) => {
+    const { name } = req.params;
+    const { postedBy, text } = req.body;
+
+    const article = articlesInfo.find(a => a.name === name);
+
+    if (article) {
+        article.comments.push({ postedBy, text });
+        res.send(article.comments);
+    } else {
+        res.send('That article doesn\'t exist!');
+    }
+});
 
 app.listen(8001, () => {
-    console.log("Server is listening on port 8001");
-}); 
+    console.log('Server is listening on port 8001');
+});
