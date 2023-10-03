@@ -1,25 +1,6 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
-
-
-// fake database
-let articlesInfo = [{
-    name: 'learn-react',
-    upvotes: 0,
-    comments: [],
-},
-{
-    name: 'learn-node',
-    upvotes: 0,
-    comments: [],
-
-},
-{
-    name: 'mongo-db',
-    upvotes: 0,
-    comments: [],
-}
-]
+// import { db, connectToDb } from './db.js';
 
 const app = express();
 app.use(express.json());
@@ -35,7 +16,6 @@ app.get('/api/articles/:name', async (req, res) => {
 
     const client = new MongoClient('mongodb://127.0.0.1:27017');
     await client.connect();
-
     const db = client.db('react-blog-db');
 
     const article = await db.collection('articles').findOne({ name });
@@ -106,6 +86,13 @@ app.post('/api/articles/:name/comments', async (req, res) => {
         res.send('That article doesn\'t exist!');
     }
 });
+
+// connectToDb(() => {
+//     console.log('Successfully connected to database!');
+//     app.listen(8001, () => {
+//         console.log('Server is listening on port 8001');
+//     });
+// })
 
 app.listen(8001, () => {
     console.log('Server is listening on port 8001');
