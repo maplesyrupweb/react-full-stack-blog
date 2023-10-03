@@ -1,6 +1,6 @@
 import express from 'express';
 import { MongoClient } from 'mongodb';
-// import { db, connectToDb } from './db.js';
+import { db, connectToDb } from './db.js';
 
 const app = express();
 app.use(express.json());
@@ -52,7 +52,8 @@ app.put('/api/articles/:name/upvote', async (req, res) => {
     const article = await db.collection('articles').findOne({name})
 
     if (article) {
-        res.send(`The ${name} article now has ${article.upvotes} upvotes!!!`);
+        // res.send(`The ${name} article now has ${article.upvotes} upvotes!!!`);
+        res.json(article);
         console.log(`upvoted: the ${name} article now has ${article.upvotes} votes!!!`)
     } else {
         res.send('That article doesn\'t exist');
