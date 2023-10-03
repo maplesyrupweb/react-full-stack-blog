@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import articles from "./article-content.js"
 import NotFoundPage from "./NotFoundPage.js";
 import axios from 'axios';
+import CommentsList from "../components/CommentsList.js";
 
 const ArticlePage = () => {
 
@@ -41,6 +42,12 @@ const ArticlePage = () => {
                 
                 <p key={index}>{paragraph}</p>
             ))}
+
+            <p> 
+                <CommentsList comments={articleInfo.comments}
+                />
+            </p>
+
         </>        
 
     );
