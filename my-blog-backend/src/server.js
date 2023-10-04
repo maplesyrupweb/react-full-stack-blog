@@ -21,6 +21,7 @@ app.get('/api/articles/:name', async (req, res) => {
     const article = await db.collection('articles').findOne({ name });
 
     if (article) {
+        //res.send(article)
         res.json(article);
         console.log("article found")
     } else {
@@ -82,7 +83,8 @@ app.post('/api/articles/:name/comments', async (req, res) => {
     const article = await db.collection('articles').findOne({ name });
 
     if (article) {
-        res.send(article.comments);
+        //res.send(article.comments);
+        res.json(article.comments);
     } else {
         res.send('That article doesn\'t exist!');
     }

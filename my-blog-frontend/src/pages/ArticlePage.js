@@ -4,6 +4,7 @@ import articles from "./article-content.js"
 import NotFoundPage from "./NotFoundPage.js";
 import axios from 'axios';
 import CommentsList from "../components/CommentsList.js";
+import CommentForm from "../components/CommentForm.js";
 
 const ArticlePage = () => {
 
@@ -35,6 +36,7 @@ const ArticlePage = () => {
         const response = await axios.put(`/api/articles/${articleId}/upvote`); 
 
         const updatedArticle = response.data;
+        //setArticleInfo is used in loadArticleInfo and updatedArticle
         setArticleInfo(updatedArticle);        
     }
     
@@ -59,8 +61,15 @@ const ArticlePage = () => {
                 <p key={index}>{paragraph}</p>
             ))}
 
-            <p> 
-                <CommentsList comments={articleInfo.comments}
+            
+
+            <p>
+                <CommentForm 
+                    //we get articleName from URL paraemter
+                    articleName={articleId}
+                    //annonymous function
+                    //setArticleInfo is used in loadArticleInfo and updatedArticle above
+                    onArticleUpdated={updatedArticle => setArticleInfo(updatedArticle)}
                 />
             </p>
 
