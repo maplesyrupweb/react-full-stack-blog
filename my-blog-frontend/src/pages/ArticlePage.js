@@ -62,8 +62,6 @@ const ArticlePage = () => {
             ))}
 
             
-
-            <p>
                 <CommentForm 
                     //we get articleName from URL paraemter
                     articleName={articleId}
@@ -71,8 +69,8 @@ const ArticlePage = () => {
                     //setArticleInfo is used in loadArticleInfo and updatedArticle above
                     onArticleUpdated={updatedArticle => setArticleInfo(updatedArticle)}
                 />
-            </p>
 
+                <CommentsList comments={articleInfo.comments} />
         </>        
 
     );
