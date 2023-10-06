@@ -13,11 +13,13 @@ const LoginPage = () => {
     const logIn = async () => {
         try {
             await signInWithEmailAndPassword(getAuth(), email, password);   
+            console.log("successful");
             //route after successful login
             navigate('/articles');
         }
         catch (error) {
             setError(error.message);
+            console.log(`Error: ${error}`)
         }
         
     }
@@ -28,43 +30,27 @@ const LoginPage = () => {
 
         {error && <p className="error">{error}</p> }
 
-            <form>
-                <label>
-                    Email:
-                    <input 
-                        type="email" 
-                        placeholder='Email'
-                        id="email"
-                        value={email}
-                        onChange={event => setEmail(event.target.value)}
-
-                    />
-                </label>
-                
-                <label>
-                    Password:
-                    <input 
-                        type="password"
-                        placeholder='Password'
-                        id="password"
-                        value={password}
-                        onChange={event => setPassword(event.target.value)}
-                    />
-                </label>
-                
+            <input 
+                type="email" 
+                placeholder='Email'
+                id="email"
+                value={email}
+                onChange={event => setEmail(event.target.value)}
+            />
+            <input 
+                type="password"
+                placeholder='Password'
+                id="password"
+                value={password}
+                onChange={event => setPassword(event.target.value)}
+            />
 
             <button onClick={logIn}>Log In</button>
 
-            <Link to="/signup">Doesn't have an account, create one here</Link>
-                
-            </form>
+            <Link to="/signup">Sign Up</Link>                
+            
         </>
     )
-    
-
 }
-
-
-
 
 export default LoginPage;

@@ -13,3 +13,9 @@
 
 - Email: 01@a.com
 - Password: Sushi2023
+
+- Email: a@a.com
+- Password: golden
+
+- Email: b@b.com
+- Password: golden
