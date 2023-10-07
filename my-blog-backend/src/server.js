@@ -1,11 +1,12 @@
 import fs from 'fs';
-import admin, {auth} from 'firebase-admin'
+// import admin, { auth } from 'firebase-admin';
+import admin from 'firebase-admin';
 import express from 'express';
 import { MongoClient } from 'mongodb';
 import { db, connectToDb } from './db.js';
 
 const credentials = JSON.parse(
-    fs.readFileSync('../credentials.json')
+    fs.readFileSync('./credentials.json')
 );
 
 admin.initializeApp({
@@ -23,9 +24,9 @@ app.use(express.json());
  ******************************************************/
 
 
-app.use(async (request, response, next ) => {
+app.use(async (req, response, next ) => {
 
-    const  { authtoken } = request.headers;
+    const  { authtoken } = req.headers;
 
     if (authtoken) {
 
@@ -34,9 +35,15 @@ app.use(async (request, response, next ) => {
             response.user = user;    
         }
         catch (error) {
-            response.sendStatus(400);
             console.log(`Server Error: ${error.message }`)
+
+            //prevent next() from being called
+            return response.sendStatus(400);
+            
         }}   
+
+        // in case req.user is empty
+        req.user = req.user || {};
 
         next();
     })
@@ -63,7 +70,7 @@ app.get('/api/articles/:name', async (req, res) => {
         const upvoteIds = article.upvoteIds || [];
 
         // ensure user's ID isn't already in the upvote ID's array
-        article.canUpvote = uid && !upvoteIds.include(uid);  
+        article.canUpvote = uid && !upvoteIds.includes(uid);  
 
         //res.send(article)
         res.json(article);
@@ -120,7 +127,7 @@ app.put('/api/articles/:name/upvote', async (req, res) => {
         const upvoteIds = article.upvoteIds || [];
         
         // ensure user's ID isn't already in the upvote ID's array
-        const canUpvote = uid && !upvoteIds.include(uid);  
+        const canUpvote = uid && !upvoteIds.includes(uid);  
 
         if (canUpvote) {
 
