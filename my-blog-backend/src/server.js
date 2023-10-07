@@ -1,5 +1,5 @@
 import fs from 'fs';
-import admin from 'firebase-admin'
+import admin, {auth} from 'firebase-admin'
 import express from 'express';
 import { MongoClient } from 'mongodb';
 import { db, connectToDb } from './db.js';
@@ -15,6 +15,32 @@ admin.initializeApp({
 const app = express();
 app.use(express.json());
 
+
+/******************************************************
+ * 
+ * load user automatically from auth token
+ * 
+ ******************************************************/
+
+
+app.use(async (request, response, next ) => {
+
+    const  { authtoken } = request.headers;
+
+    if (authtoken) {
+
+        try {
+            const user = await admin.auth().verifyIdToken(authtoken);
+            response.user = user;    
+        }
+        catch (error) {
+            response.sendStatus(400);
+            console.log(`Server Error: ${error.message }`)
+        }}   
+
+        next();
+    })
+
 /******************************************************
  * 
  * Endpoint for getting an article 
@@ -23,6 +49,7 @@ app.use(express.json());
 
 app.get('/api/articles/:name', async (req, res) => {
     const { name } = req.params;
+    const { uid } = req.user;
 
     const client = new MongoClient('mongodb://127.0.0.1:27017');
     await client.connect();
@@ -31,6 +58,13 @@ app.get('/api/articles/:name', async (req, res) => {
     const article = await db.collection('articles').findOne({ name });
 
     if (article) {
+
+        // default value is empty erray
+        const upvoteIds = article.upvoteIds || [];
+
+        // ensure user's ID isn't already in the upvote ID's array
+        article.canUpvote = uid && !upvoteIds.include(uid);  
+
         //res.send(article)
         res.json(article);
         console.log("article found")
@@ -39,6 +73,27 @@ app.get('/api/articles/:name', async (req, res) => {
         console.log("article NOT found")
     }
 });
+
+
+/******************************************************
+ * 
+ * Middleware
+ * 
+ ******************************************************/
+
+
+app.use((request, response, next ) => {
+
+    if (request.user) {
+        next();
+    } 
+    else {
+        response.sentStatus(401);
+        console.log("401. User is not allowed to access the resource.");
+    }
+
+});
+
 
 /******************************************************
  * 
@@ -49,26 +104,43 @@ app.get('/api/articles/:name', async (req, res) => {
 
 app.put('/api/articles/:name/upvote', async (req, res) => {
     const { name } = req.params;
+    const { uid } = req.user;
 
     // same 3 lines as finding an artice
     const client = new MongoClient('mongodb://127.0.0.1:27017');
     await client.connect();
     const db = client.db('react-blog-db');
 
-    //$inc is increment, $set is set
-    await db.collection('articles').updateOne({name}, {$inc: {upvotes: 1},
-    })
 
-    // load the updated article
-    const article = await db.collection('articles').findOne({name})
+    const article = await db.collection('articles').findOne({ name });
 
     if (article) {
+
+        // default value is empty erray
+        const upvoteIds = article.upvoteIds || [];
+        
+        // ensure user's ID isn't already in the upvote ID's array
+        const canUpvote = uid && !upvoteIds.include(uid);  
+
+        if (canUpvote) {
+
+            //$inc is increment, $set is set
+            await db.collection('articles').updateOne({name}, {
+                $inc: {upvotes: 1},
+                $push: { upvoteIds: uid },
+            });
+        }
+  
+        // load the updated article
+        const updatedArticle = await db.collection('articles').findOne({name});
+
+        
         // res.send(`The ${name} article now has ${article.upvotes} upvotes!!!`);
-        res.json(article);
-        console.log(`upvoted: the ${name} article now has ${article.upvotes} votes!!!`)
-    } else {
-        res.send('That article doesn\'t exist');
-        console.log('That article doesn\'t exist' );
+        res.json(updatedArticle);
+        console.log(`upvoted: the ${name} article now has ${article.upvotes} votes!!!`);
+    }  
+    else {
+        res.send('That article doesn\'t exist!');
     }
 });
 
@@ -81,14 +153,15 @@ app.put('/api/articles/:name/upvote', async (req, res) => {
 
 app.post('/api/articles/:name/comments', async (req, res) => {
     const { name } = req.params;
-    const { postedBy, text } = req.body;
+    const { text } = req.body;
+    const { email } = req.user;
 
     const client = new MongoClient('mongodb://127.0.0.1:27017');
     await client.connect();
     const db = client.db('react-blog-db');
 
     await db.collection('articles').updateOne({ name }, {
-        $push: { comments: { postedBy, text } },
+        $push: { comments: { postedBy: email, text } },
     });
     const article = await db.collection('articles').findOne({ name });
 
