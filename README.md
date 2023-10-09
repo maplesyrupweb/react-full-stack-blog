@@ -13,8 +13,14 @@
 - copy build to backend folder
 - on backend folder, run npm rn dev
 
-## Links
+
+## Resource Links
 - [Firebase](https://console.firebase.google.com/)
+- [MonGoDB] (https://www.mongodb.com/)
+- [Google Cloud Console](https://console.cloud.google.com/) 
+- [Install Google Cloud CLI](https://www.youtube.com/watch?v=k-8qFh8EfFA)
+
+
 
 ## Sample users
 

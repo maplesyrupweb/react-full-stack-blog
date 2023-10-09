@@ -10,6 +10,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const adminPassword = encodeURIComponent( process.env.MONGO_PASSWORD );
+console.log(adminPassword);
+
 const credentials = JSON.parse(
     fs.readFileSync('./credentials.json')
 );
@@ -68,7 +71,16 @@ app.get('/api/articles/:name', async (req, res) => {
     const { name } = req.params;
     const { uid } = req.user;
 
-    const client = new MongoClient('mongodb://127.0.0.1:27017');
+    // const client = new MongoClient('mongodb://127.0.0.1:27017');
+    // const client = new MongoClient(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.dev0vku.mongodb.net/?retryWrites=true&w=majority`)
+
+    
+
+    const client = new MongoClient(`mongodb+srv://node-server:${process.env.MONGO_USERNAME}:${adminPassword}@cluster0.dev0vku.mongodb.net/?retryWrites=true&w=majority`);
+    
+    
+    // mongosh "mongodb+srv://cluster0.dev0vku.mongodb.net/" --apiVersion 1 --username node-server
+
     await client.connect();
     const db = client.db('react-blog-db');
 
@@ -111,7 +123,11 @@ app.put('/api/articles/:name/upvote', async (req, res) => {
     const { name } = req.params;
     const { uid } = req.user;
 
-    const client = new MongoClient('mongodb://127.0.0.1:27017');
+    // const client = new MongoClient(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.dev0vku.mongodb.net/?retryWrites=true&w=majority`)
+
+    const client = new MongoClient(`mongodb+srv://node-server:${process.env.MONGO_USERNAME}:${adminPassword}@cluster0.dev0vku.mongodb.net/?retryWrites=true&w=majority`);
+    
+    
     await client.connect();
     const db = client.db('react-blog-db');
 
@@ -148,7 +164,11 @@ app.post('/api/articles/:name/comments', async (req, res) => {
     const { text } = req.body;
     const { email } = req.user;
 
-    const client = new MongoClient('mongodb://127.0.0.1:27017');
+    // const client = new MongoClient(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.dev0vku.mongodb.net/?retryWrites=true&w=majority`)
+
+    const client = new MongoClient(`mongodb+srv://node-server:${process.env.MONGO_USERNAME}:${adminPassword}@cluster0.dev0vku.mongodb.net/?retryWrites=true&w=majority`);
+    
+    
     await client.connect();
     const db = client.db('react-blog-db');
 
