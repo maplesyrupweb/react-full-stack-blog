@@ -7,11 +7,6 @@ import CommentForm from '../components/CommentForm';
 import useUser from '../hooks/useUser';
 import articles from './article-content';
 
-function handleClick() {
-    alert('You clicked me!');
-  }
-
-
 const ArticlePage = () => {
     const [articleInfo, setArticleInfo] = useState({ upvotes: 0, comments: [], canUpvote: false });
     const { canUpvote } = articleInfo;
@@ -33,6 +28,7 @@ const ArticlePage = () => {
         if (!isLoading) {
             loadArticleInfo();
         }
+    //dependencies for useEffect hook
     }, [isLoading, user]);
 
     const article = articles.find(article => article.name === articleId);
@@ -49,18 +45,15 @@ const ArticlePage = () => {
         return <NotFoundPage />
     }
 
-
-
     return (
         <>
         <h1>{article.title}</h1>
         <div className="upvotes-section">
             {user
-                ? <button onClick={addUpvote}>{canUpvote ? 'Upvote' : 'Already Upvoted'}</button>
+                ? <button onClick={addUpvote}>{canUpvote ? 'Upvote' : 'Already upvoted'}</button>
                 : <button onClick={() => {
                     navigate('/login');
                   }}>Log in</button>}
-            
             <p>This article has {articleInfo.upvotes} upvote(s)</p>
         </div>
         {article.content.map((paragraph, i) => (
@@ -70,9 +63,9 @@ const ArticlePage = () => {
             ? <CommentForm
                 articleName={articleId}
                 onArticleUpdated={updatedArticle => setArticleInfo(updatedArticle)} />
-            : <button onClick={() => {
+            : <button onClick={()=> {
                 navigate('/login');
-              }}>Log in</button>}
+            }} >Log in to add a comment</button>}
         <CommentsList comments={articleInfo.comments} />
         </>
     );
